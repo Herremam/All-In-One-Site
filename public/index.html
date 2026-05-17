@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XConvert Clone - Free Online File Converter</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-sans">
+
+  <header class="bg-white border-b border-gray-200 py-4 px-6 flex justify-between items-center shadow-sm">
+    <div class="text-2xl font-black text-blue-600 tracking-tight">
+      XConvert<span class="text-gray-400">.clone</span>
+    </div>
+    <nav class="space-x-4 text-sm font-medium text-gray-600">
+      <a href="#" class="hover:text-blue-600">Compressor</a>
+      <a href="#" class="hover:text-blue-600">Converter</a>
+    </nav>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12 max-w-4xl">
+    <div class="space-y-8">
+      <div class="text-center space-y-2">
+        <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl">
+          Convert and Compress Files Securely
+        </h1>
+        <p class="text-lg text-gray-500">High-quality image conversion tool.</p>
+      </div>
+
+      <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 space-y-6">
+        
+        <!-- Drag & Drop Zone -->
+        <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500 transition bg-gray-50 hover:bg-blue-50/30 group">
+          <input type="file" id="fileInput" class="hidden" />
+          <svg class="mx-auto h-12 w-12 text-gray-400 group-hover:text-blue-500 transition mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          <p id="dropZoneText" class="text-base font-medium text-gray-700">Click to upload or drag and drop an image</p>
+          <p class="text-xs text-gray-400 mt-1">Supports PNG, JPG, WEBP up to 4MB</p>
+        </div>
+
+        <!-- File Config Bar -->
+        <div id="fileConfigBar" class="hidden flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 gap-4">
+          <div class="flex items-center space-x-3">
+            <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <div>
+              <p id="fileName" class="text-sm font-semibold truncate max-w-xs text-gray-800">file.txt</p>
+              <p id="fileSize" class="text-xs text-gray-400">0.00 MB</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
+            <span class="text-sm text-gray-500 font-medium">Convert to:</span>
+            <select id="targetFormat" class="rounded-lg border-gray-300 border p-2 bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="jpeg">JPG</option>
+              <option value="png">PNG</option>
+              <option value="webp">WEBP</option>
+            </select>
+            <button id="convertBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2 px-5 rounded-lg transition shadow-md">
+              Convert
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress State -->
+        <div id="uploadProgressContainer" class="hidden space-y-2">
+          <div class="flex justify-between text-sm font-medium text-gray-600">
+            <span>Processing File...</span>
+            <span id="progressPercent">0%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div id="progressBarFill" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Success Result Screen -->
+        <div id="successContainer" class="hidden p-4 bg-green-50 border border-green-200 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div class="flex items-center space-x-3 text-green-800">
+            <svg class="h-6 w-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="font-medium text-sm">Conversion completed!</span>
+          </div>
+          <a id="downloadBtn" href="#" target="_blank" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold text-sm py-2 px-5 rounded-lg transition text-center">
+            Download File
+          </a>
+        </div>
+
+        <!-- Failure Screen -->
+        <div id="errorContainer" class="hidden p-4 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-3 text-red-800">
+          <svg class="h-6 w-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="font-medium text-sm">An error occurred during file conversion.</span>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let selectedFile = null;
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileConfigBar = document.getElementById('fileConfigBar');
+    const fileNameDisplay = document.getElementById('fileName');
+    const fileSizeDisplay = document.getElementById('fileSize');
+    const convertBtn = document.getElementById('convertBtn');
+    const targetFormatSelect = document.getElementById('targetFormat');
+
+    const uploadProgressContainer = document.getElementById('uploadProgressContainer');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const successContainer = document.getElementById('successContainer');
+    const errorContainer = document.getElementById('errorContainer');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-blue-500'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-blue-500'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) handleFileSelection(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFileSelection(e.target.files[0]);
+    });
+
+    function handleFileSelection(file) {
+      selectedFile = file;
+      fileNameDisplay.textContent = file.name;
+      fileSizeDisplay.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+      fileConfigBar.classList.remove('hidden');
+      successContainer.classList.add('hidden');
+      errorContainer.classList.add('hidden');
+    }
+
+    convertBtn.addEventListener('click', () => {
+      if (!selectedFile) return;
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('targetFormat', targetFormatSelect.value);
+
+      fileConfigBar.classList.add('hidden');
+      uploadProgressContainer.classList.remove('hidden');
+
+      const xhr = new XMLHttpRequest();
+      // Relative API path works flawlessly on Vercel deployments
+      xhr.open('POST', '/api/convert', true);
+
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded * 100) / e.total);
+          progressBarFill.style.width = percent + '%';
+          progressPercent.textContent = percent + '%';
+        }
+      });
+
+      xhr.onload = function () {
+        uploadProgressContainer.classList.add('hidden');
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          successContainer.classList.remove('hidden');
+          downloadBtn.href = response.dataUrl;
+        } else {
+          errorContainer.classList.remove('hidden');
+        }
+      };
+      xhr.send(formData);
+    });
+  </script>
+</body>
+</html>
